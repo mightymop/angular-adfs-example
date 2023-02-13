@@ -12,10 +12,10 @@ Nach der Eingabe der `poldom.local` Logindaten:
 Swagger: `https://dc2019.poldom.local/test_service/swagger/index.html`
 
 *OPEN ID CONNECT LOGIN:*
-In Swagger muss dann bei `Authorize` dann der Haken bei `openid` gesetzt werden.
+In Swagger muss dann bei `Authorize` dann ein Haken bei `openid` gesetzt werden.
 
 *ANMELDUNG MIT VORHANDENEM TOKEN:*
-Eingabe von: Bearer TOKEN
+Bearer TOKEN
 
 Man ist angemeldet und kommt auf die "Home"-Page.
 
