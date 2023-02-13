@@ -1,0 +1,10 @@
+
+<div class="container mx-auto">
+    <button (click)="login()" class="button" *ngIf="showLoginButton" >Anmelden</button>
+    <button (click)="logout()" class="button" *ngIf="showLogoutButton">Abmelden</button>
+    <button class="button" [routerLink]="['/home']" routerLinkActive="active-link" *ngIf="showLogoutButton">Home</button>
+</div>
+
+<div class="container mx-auto p-4 bg-gray-100 border border-gray-300 rounded-lg">
+    <router-outlet></router-outlet>
+</div>
