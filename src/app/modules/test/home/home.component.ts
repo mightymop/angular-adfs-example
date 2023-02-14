@@ -30,10 +30,9 @@ export class HomeComponent implements OnInit{
   }
 
   getBackendData() {
-    this.loginsrv.refreshAccessToken().subscribe((res:Access_token)=>{
-      console.log(res);
+    this.loginsrv.refreshAccessToken().subscribe((access_token:string)=>{
       const headers = new HttpHeaders({
-        'Authorization': 'Bearer ' + res.access_token
+        'Authorization': 'Bearer ' + access_token
       });
 
       this.http.get(this.backendUrl, { headers }).subscribe(data => {

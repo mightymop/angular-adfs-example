@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
   public showLogoutButton: boolean = false;
   
   constructor(
-    private router: Router, private loginSrv: LoginSrvService
+    private loginSrv: LoginSrvService
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +35,6 @@ export class AppComponent implements OnInit {
     }
     console.debug("INIT END");
   }
-
 
   public logout() {    
     this.loginSrv.logout();
