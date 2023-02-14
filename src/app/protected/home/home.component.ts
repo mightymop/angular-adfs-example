@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { Access_token, LoginSrvService } from 'src/app/login-srv.service';
+import { LoginService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -12,7 +12,7 @@ export class HomeComponent implements OnInit{
   private backendUrl : string = 'https://dc2019.poldom.local/test_service/test/info';
   public backenddata: any="NIX DA";
 
-  constructor(private http: HttpClient, private loginsrv: LoginSrvService)
+  constructor(private http: HttpClient, private loginsrv: LoginService)
   {
 
   }

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import { Router } from '@angular/router';
-import { LoginSrvService } from './login-srv.service';
+import { LoginService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +12,7 @@ export class AppComponent implements OnInit {
   public showLogoutButton: boolean = false;
   
   constructor(
-    private loginSrv: LoginSrvService
+    private loginSrv: LoginService
   ) {}
 
   ngOnInit(): void {

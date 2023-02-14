@@ -16,7 +16,7 @@ export interface Access_token {
 @Injectable({
   providedIn: 'root'
 })
-export class LoginSrvService {
+export class LoginService {
 
   private adfsBaseUrl = 'https://dc2019.poldom.local/adfs';
   private clientId = '633d0b2d-a45e-4e9a-9288-64344f5d19fc';

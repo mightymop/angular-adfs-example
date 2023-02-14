@@ -4,8 +4,8 @@ import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from './app.component'
 import { HttpClientModule } from '@angular/common/http'
 import { RouterModule, Routes } from '@angular/router'
-import { CustomAuthGuard } from './auth.guard'
-import { HomeComponent } from './modules/test/home/home.component'
+import { CustomAuthGuard } from './auth/auth.guard'
+import { HomeComponent } from './protected/home/home.component'
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [CustomAuthGuard] },
