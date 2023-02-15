@@ -9,7 +9,8 @@ import { LoginService } from 'src/app/auth/auth.service';
 })
 export class HomeComponent implements OnInit{
 
-  private backendUrl : string = 'https://dc2019.poldom.local/test_service/test/info';
+  //https://localhost:7039/swagger/index.html
+  private backendUrl : string = 'https://localhost:7039/test/info';
   public backenddata: any="NIX DA";
 
   constructor(private http: HttpClient, private loginsrv: LoginService)
@@ -35,9 +36,14 @@ export class HomeComponent implements OnInit{
         'Authorization': 'Bearer ' + access_token
       });
 
-      this.http.get(this.backendUrl, { headers }).subscribe(data => {
-        console.log(data);
-        this.backenddata=JSON.stringify(data);
+      this.http.get(this.backendUrl, { headers }).subscribe({
+        next: (data:any) => {
+          console.log(data);
+          this.backenddata=JSON.stringify(data);
+        },
+        error: (err:any)=>{
+          console.error(err);
+        }     
       });
     });
   }
