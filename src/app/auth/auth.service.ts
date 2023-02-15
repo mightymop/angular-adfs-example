@@ -1,4 +1,3 @@
-import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 
@@ -23,7 +22,7 @@ export class LoginService {
 
   private timeSafetyDeduction: number = 10;
 
-  constructor(private http: HttpClient) { }
+  constructor() { }
 
   private setIDToken(token: string | undefined | null): void {
     if (token !== null && token !== undefined) {
@@ -171,9 +170,8 @@ export class LoginService {
 
   private retrieveAccessToken(): Observable<any> {
 
-    const headers = new HttpHeaders({
-      "Content-Type": "application/x-www-form-urlencoded"
-    });
+    let headers :  { [key: string]: string } = {};
+	  headers["Content-Type"]="application/x-www-form-urlencoded";
 
     const body = new URLSearchParams();
     body.set("grant_type", "authorization_code");
@@ -181,7 +179,7 @@ export class LoginService {
     body.set("client_id", this.clientId);
     body.set("redirect_uri", window.location.origin);
 
-    return this.http.post(`${this.adfsBaseUrl}/oauth2/token`, body.toString(), { headers })
+    return this.post(`${this.adfsBaseUrl}/oauth2/token`, body.toString(),  headers );
   }
 
   public refreshAccessToken(force: boolean = false): Observable<any> {
@@ -208,17 +206,16 @@ export class LoginService {
     }
 
     return from(new Promise((resolve, reject) => {
-      const headers = new HttpHeaders({
-        "Content-Type": "application/x-www-form-urlencoded"
-      });
-
+      let headers : { [key: string]: string } = {};
+	    headers["Content-Type"]="application/x-www-form-urlencoded";
+     
       const body = new URLSearchParams();
       body.set("grant_type", "refresh_token");
       body.set("refresh_token", localRefreshToken!);
       body.set("client_id", this.clientId);
 
       //access_token mit refresh_token neu beziehen... mittels refresh_token
-      this.http.post(`${this.adfsBaseUrl}/oauth2/token`, body.toString(), { headers })
+      this.post(`${this.adfsBaseUrl}/oauth2/token`, body.toString(),headers)
         .subscribe({
           next: (data: any) => {
             this.setAccessToken(data);
@@ -230,6 +227,40 @@ export class LoginService {
           }
         });
     }));
+  }
+  
+  private post(url:string, body:any,headers?: { [key: string]: string }) : Observable<any>
+  {
+	return from(new Promise((resolve,reject)=>{
+		  const xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+		  xhr.open('POST', url);
+		  if (headers)
+		  {
+			  for (let key in headers)
+			  {
+				xhr.setRequestHeader(key, headers[key]);
+			  }
+		  }
+		  xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4)
+			{
+				if (xhr.status === 200)
+				{
+					const responseData = JSON.parse(xhr.responseText);
+					resolve(responseData);
+				}
+				else 
+				{
+					reject(xhr.statusText);
+				}
+			}
+		  };
+		  xhr.onerror = function(err:any) {
+			reject(err);
+		  }
+		  xhr.send(body);
+	}));	
   }
 
   public logout() {
