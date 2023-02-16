@@ -280,8 +280,7 @@ class LoginServiceHelper {
     }
 
     logout() {
-      this.setAccessToken(null);
-      this.setIDToken(null);
+      this.setTokenRepo(undefined);
       this.setAuthCode(null);
       window.location.hash = '';
 
