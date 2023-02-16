@@ -1,6 +1,7 @@
 <p>HOME</p>
 
 <div>INFO: {{backenddata}}<br>
+    <div>Backendurl:&nbsp;<input style="width:100%;" type="text" placeholder="{{default}}" (keyup)="onKey($event)"/></div>
     <button (click)="reload()" class="button">Reload</button><br>
-    <button (click)="clear()" class="button">clear</button>
+    <button (click)="clear()" class="button">clear</button>    
 </div>

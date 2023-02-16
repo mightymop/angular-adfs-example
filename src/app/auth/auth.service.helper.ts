@@ -1,14 +1,12 @@
-import { from, Observable, of } from 'rxjs';
-
-export interface Access_token {
-  access_token: string,
-  expires_in: number,
+export interface Token_Repo {
+  access_token?: string,
+  expires_in?: number,
   id_token?: string,
-  refresh_token: string,
-  refresh_token_expires_in: number,
+  refresh_token?: string,
+  refresh_token_expires_in?: number,
   resource?: string,
   scope?: string
-  token_type: string
+  token_type?: string
 };
 
 export class LoginServiceHelper {
@@ -18,13 +16,38 @@ export class LoginServiceHelper {
     private timeSafetyDeduction: number = 10,
     private useCredentials: boolean = false) { }
 
-  private setIDToken(token: string | undefined | null): void {
-    if (token !== null && token !== undefined) {
-      window.localStorage.setItem(`${this.clientId}_oidc_jwt_id_token`, token);
+  private setTokenRepo(repo: Token_Repo | undefined): void {
+    if (repo !== undefined) {
+      window.localStorage.setItem(`${this.clientId}_oidc_token_repo`, JSON.stringify(repo));
     }
     else {
-      window.localStorage.setItem(`${this.clientId}_oidc_jwt_id_token`, "");
+      window.localStorage.setItem(`${this.clientId}_oidc_token_repo`, "");
     }
+  }
+
+  private getTokenRepo(): Token_Repo | undefined {
+
+    let repo = window.localStorage.getItem(`${this.clientId}_oidc_token_repo`);
+    if (repo !== "" && repo !== null && repo !== undefined) {
+      return <Token_Repo>JSON.parse(repo);
+    }
+
+    return undefined;
+
+  }
+
+  private setIDToken(token: string | undefined): void {
+    let repo = this.getTokenRepo();
+    if (!repo) {
+      repo = {
+        id_token: token
+      };
+    }
+    else {
+      repo.id_token = token;
+    }
+
+    this.setTokenRepo(repo);
   }
 
   private setAuthCode(token: string | undefined | null): void {
@@ -40,53 +63,67 @@ export class LoginServiceHelper {
     return Math.floor(Date.now() / 1000);
   }
 
-  private setAccessToken(token: Access_token | undefined | null): void {
-    if (token !== null && token !== undefined) {
-
-      let localToken = <Access_token | string | null>window.localStorage.getItem(`${this.clientId}_oidc_jwt_access_token`);
-      if (!localToken) {
-        window.localStorage.setItem(`${this.clientId}_oidc_jwt_access_token`, JSON.stringify(token));
-        localToken = token;
-      }
-      else {
-        localToken = JSON.parse(<string>localToken);
-        (<Access_token>localToken).access_token = token.access_token;
-        (<Access_token>localToken).expires_in = token.expires_in;
-        (<Access_token>localToken).token_type = token.token_type;
-        (<Access_token>localToken).id_token = token.id_token;
-        window.localStorage.setItem(`${this.clientId}_oidc_jwt_access_token`, JSON.stringify(localToken));
-      }
-
-      window.localStorage.setItem(`${this.clientId}_oidc_accessTokenExpiresIn`, (this.getTimestamp() + (<Access_token>localToken).expires_in - this.timeSafetyDeduction).toString());
-      window.localStorage.setItem(`${this.clientId}_oidc_refreshTokenExpiresIn`, (this.getTimestamp() + (<Access_token>localToken).refresh_token_expires_in - this.timeSafetyDeduction).toString());
+  private setAccessToken(token: Token_Repo): void {
+    let repo = this.getTokenRepo();
+    if (!repo) {
+      repo = {
+        access_token: token.access_token,
+        expires_in: token.expires_in,
+        id_token: token.id_token,
+        refresh_token: token.refresh_token,
+        refresh_token_expires_in: token.refresh_token_expires_in,
+        resource: token.resource,
+        scope: token.scope,
+        token_type: token.token_type
+      };
     }
     else {
-      window.localStorage.setItem(`${this.clientId}_oidc_jwt_access_token`, "");
-      window.localStorage.setItem(`${this.clientId}_oidc_accessTokenExpiresIn`, "");
-      window.localStorage.setItem(`${this.clientId}_oidc_refreshTokenExpiresIn`, "");
+      repo.access_token = token ? token.access_token : repo.access_token;
+      repo.expires_in = token ? token.expires_in : repo.expires_in;
+      repo.id_token = token ? token.id_token : repo.id_token;
+      repo.refresh_token = token ? token.refresh_token : repo.refresh_token;
+      repo.refresh_token_expires_in = token ? token.refresh_token_expires_in : repo.refresh_token_expires_in;
+      repo.resource = token ? token.resource : repo.resource;
+      repo.scope = token ? token.scope : repo.scope;
+      repo.token_type = token ? token.token_type : repo.token_type;
     }
+
+    window.localStorage.setItem(`${this.clientId}_oidc_accessTokenExpiresIn`, (this.getTimestamp() + repo.expires_in! - this.timeSafetyDeduction).toString());
+    window.localStorage.setItem(`${this.clientId}_oidc_refreshTokenExpiresIn`, (this.getTimestamp() + repo.refresh_token_expires_in! - this.timeSafetyDeduction).toString());
+
+    this.setTokenRepo(repo);
   }
 
   public hasIDToken(): boolean {
-    let id_token = window.localStorage.getItem(`${this.clientId}_oidc_jwt_id_token`);
-    return id_token !== "" && id_token !== null;
+    let repo = this.getTokenRepo();
+    if (repo) {
+      return repo.id_token ? true : false;
+    }
+    return false;
   }
 
   public getIDToken(): string | undefined {
-    let id_token = window.localStorage.getItem(`${this.clientId}_oidc_jwt_id_token`);
-    return id_token !== null && id_token !== "" ? id_token : undefined;
+    let repo = this.getTokenRepo();
+    if (repo) {
+      return repo.id_token;
+    }
+    return undefined;
   }
 
   private getAccessToken(): string | undefined {
-    let access_token = window.localStorage.getItem(`${this.clientId}_oidc_jwt_access_token`);
+    let access_token = undefined;
+    let repo = this.getTokenRepo();
+    if (repo) {
+      access_token = repo.access_token;
+    }
 
-    if (access_token !== null && access_token !== "") {
+    if (access_token) {
 
       let oidc_accessTokenExpiresIn: string | null | number = window.localStorage.getItem(`${this.clientId}_oidc_accessTokenExpiresIn`);
       if (oidc_accessTokenExpiresIn !== null && oidc_accessTokenExpiresIn !== "") {
         oidc_accessTokenExpiresIn = parseInt(oidc_accessTokenExpiresIn, 10);
         if (oidc_accessTokenExpiresIn > this.getTimestamp()) {
-          return (<Access_token>JSON.parse(access_token)).access_token;
+          return access_token;
         }
       }
     }
@@ -95,15 +132,18 @@ export class LoginServiceHelper {
   }
 
   private getRefreshToken(): string | undefined {
-    let access_token = window.localStorage.getItem(`${this.clientId}_oidc_jwt_access_token`);
+    let refresh_token = undefined;
+    let repo = this.getTokenRepo();
+    if (repo) {
+      refresh_token = repo.refresh_token;
+    }
 
-    if (access_token !== null && access_token !== "") {
-
+    if (refresh_token) {
       let oidc_refreshTokenExpiresIn: string | null | number = window.localStorage.getItem(`${this.clientId}_oidc_refreshTokenExpiresIn`);
       if (oidc_refreshTokenExpiresIn !== null && oidc_refreshTokenExpiresIn !== "") {
         oidc_refreshTokenExpiresIn = parseInt(oidc_refreshTokenExpiresIn, 10);
         if (oidc_refreshTokenExpiresIn > this.getTimestamp()) {
-          return (<Access_token>JSON.parse(access_token)).refresh_token;
+          return refresh_token;
         }
       }
     }
@@ -120,16 +160,14 @@ export class LoginServiceHelper {
 
     if (!this.hasIDToken() && location.hash) {
       this.parse();
-      this.retrieveAccessToken().subscribe(
-        {
-          next: (data: Access_token) => {
+      this.retrieveAccessToken()
+      .then((data: Token_Repo) => {
             console.debug(data);
             this.setAccessToken(data);
-          },
-          error: (error: any) => {
+      })
+      .catch((error: any) => {
             console.error(error);
-          }
-        });
+      });
     }
 
     return this.hasIDToken();
@@ -162,7 +200,7 @@ export class LoginServiceHelper {
     }
   }
 
-  private retrieveAccessToken(): Observable<any> {
+  private retrieveAccessToken(): Promise<any> {
 
     let headers: { [key: string]: string } = {};
     headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -176,7 +214,7 @@ export class LoginServiceHelper {
     return this.post(`${this.adfsBaseUrl}/oauth2/token`, body.toString(), headers);
   }
 
-  public refreshAccessToken(force: boolean = false): Observable<any> {
+  public refreshAccessToken(force: boolean = false): Promise<string|undefined> {
 
     let localRefreshToken = this.getRefreshToken();
 
@@ -187,19 +225,19 @@ export class LoginServiceHelper {
       if (localAccessToken) {
         //der aktuelle access_token ist noch gültig
         //nimm den aktuellen, um Netzwerkressourcen zu sparen, refresh unnötig
-        return of(localAccessToken);
+        return new Promise((resolve)=>{resolve(localAccessToken)}); 
       }
       else {
         //undefined, wenn kein refresh_token bzw access_token vorhanden oder abgelaufen
         if (!localRefreshToken) {
           //wenn abgelaufen muss ein neuer Login vollzogen werden, da der auth code auch abgelaufen sein wird (kurze Lebenszeit)
           this.logout();
-          return of(undefined);
+          return new Promise((resolve)=>{resolve(undefined)});
         }
       }
     }
 
-    return from(new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let headers: { [key: string]: string } = {};
       headers["Content-Type"] = "application/x-www-form-urlencoded";
 
@@ -210,21 +248,20 @@ export class LoginServiceHelper {
 
       //access_token mit refresh_token neu beziehen... mittels refresh_token
       this.post(`${this.adfsBaseUrl}/oauth2/token`, body.toString(), headers)
-        .subscribe({
-          next: (data: any) => {
+        .then((data: any) => {
             this.setAccessToken(data);
             resolve(this.getAccessToken());
-          },
-          error: (error: any) => {
+          })
+        .catch((error: any) => {
             console.error(error)
             reject(error)
           }
-        });
-    }));
+        );
+    });
   }
 
-  private post(url: string, body: any, headers?: { [key: string]: string }): Observable<any> {
-    return from(new Promise((resolve, reject) => {
+  private post(url: string, body: any, headers?: { [key: string]: string }): Promise<any> {
+    return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       if (this.useCredentials) {
         xhr.withCredentials = true;
@@ -250,12 +287,11 @@ export class LoginServiceHelper {
         reject(err);
       }
       xhr.send(body);
-    }));
+    });
   }
 
   public logout() {
-    this.setAccessToken(null);
-    this.setIDToken(null);
+    this.setTokenRepo(undefined);
     this.setAuthCode(null);
     window.location.hash = '';
 
