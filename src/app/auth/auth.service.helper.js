@@ -68,14 +68,14 @@ class LoginServiceHelper {
           token_type: token.token_type
         };
       } else {
-        repo.access_token = token ? token.access_token : repo.access_token;
-        repo.expires_in = token ? token.expires_in : repo.expires_in;
-        repo.id_token = token ? token.id_token : repo.id_token;
-        repo.refresh_token = token ? token.refresh_token : repo.refresh_token;
-        repo.refresh_token_expires_in = token ? token.refresh_token_expires_in : repo.refresh_token_expires_in;
-        repo.resource = token ? token.resource : repo.resource;
-        repo.scope = token ? token.scope : repo.scope;
-        repo.token_type = token ? token.token_type : repo.token_type;
+        repo.access_token = token && token.access_token ? token.access_token : repo.access_token;
+        repo.expires_in = token && token.expires_in ? token.expires_in : repo.expires_in;
+        repo.id_token = token && token.id_token ? token.id_token : repo.id_token;
+        repo.refresh_token = token && token.refresh_token ? token.refresh_token : repo.refresh_token;
+        repo.refresh_token_expires_in = token && token.refresh_token_expires_in ? token.refresh_token_expires_in : repo.refresh_token_expires_in;
+        repo.resource = token && token.resource ? token.resource : repo.resource;
+        repo.scope = token && token.scope ? token.scope : repo.scope;
+        repo.token_type = token && token.token_type ? token.token_type : repo.token_type;
       }
 
       window.localStorage.setItem(`${this.clientId}_oidc_accessTokenExpiresIn`, (this.getTimestamp() + repo
